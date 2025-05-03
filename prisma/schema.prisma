@@ -1,0 +1,81 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum StationLayout {
+  underground
+  elevated
+  at_grade
+}
+
+model Station {
+  id          String        @id @default(cuid())
+  name        String        @unique
+  displayName String
+  layout      StationLayout @default(elevated)
+  latitude    Float?        // for future map integration
+  longitude   Float?        // for future map integration
+  lines       StationLine[]
+  fromEdges   Edge[]        @relation("FromStation")
+  toEdges     Edge[]        @relation("ToStation")
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model Line {
+  id        String       @id @default(cuid())
+  name      String       @unique
+  color     String       @unique
+  stations  StationLine[]
+  edges     Edge[]
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+}
+
+model StationLine {
+  id        String   @id @default(cuid())
+  station   Station  @relation(fields: [stationId], references: [id])
+  stationId String
+  line      Line     @relation(fields: [lineId], references: [id])
+  lineId    String
+  order     Int      // Order of station in the line
+  distance  Int      // Distance from start of line in meters
+
+  @@unique([stationId, lineId])
+  @@index([stationId])
+  @@index([lineId])
+}
+
+model Edge {
+  id          String   @id @default(cuid())
+  fromStation Station  @relation("FromStation", fields: [fromStationId], references: [id])
+  fromStationId String
+  toStation   Station  @relation("ToStation", fields: [toStationId], references: [id])
+  toStationId   String
+  distance    Int      // Distance in meters
+  line        Line     @relation(fields: [lineId], references: [id])
+  lineId      String
+
+  @@unique([fromStationId, toStationId])
+  @@index([fromStationId])
+  @@index([toStationId])
+  @@index([lineId])
+}
+
+model FarePolicy {
+  id            String   @id @default(cuid())
+  baseFare      Int      // Base fare in paise
+  perKmRate     Int      // Rate per km in paise
+  interchangeFee Int     // Fee for each interchange in paise
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+} 
