@@ -7,7 +7,8 @@ const pathFinder = new MetroPathFinder();
 const fareCalculator = new FareCalculator();
 
 // Simple in-memory cache
-const pathCache = new Map<string, any>();
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const pathCache = new Map<string, unknown>();
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 function getCacheKey(from: string, to: string) {
@@ -29,7 +30,8 @@ export async function GET(request: NextRequest) {
 
     // Check cache
     const cacheKey = getCacheKey(fromStation, toStation);
-    const cachedResult = pathCache.get(cacheKey);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const cachedResult = pathCache.get(cacheKey) as unknown;
     if (cachedResult && Date.now() - cachedResult.timestamp < CACHE_TTL) {
       return NextResponse.json(cachedResult.data);
     }
@@ -40,7 +42,7 @@ export async function GET(request: NextRequest) {
     const leastInterchangePath = await pathFinder.findLeastInterchangePath(fromStation, toStation);
 
     // Helper to compare two paths
-    function arePathsEqual(a, b) {
+    function arePathsEqual(a: any, b: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
       if (!a || !b) return false;
       if (a.path.length !== b.path.length) return false;
       for (let i = 0; i < a.path.length; i++) {
@@ -51,11 +53,8 @@ export async function GET(request: NextRequest) {
       return true;
     }
 
-    let finalShortest = shortestPath;
-    let finalLeastInterchange = leastInterchangePath;
-    if (arePathsEqual(shortestPath, leastInterchangePath)) {
-      finalLeastInterchange = null;
-    }
+    const finalShortest = shortestPath;
+    const finalLeastInterchange = arePathsEqual(shortestPath, leastInterchangePath) ? null : leastInterchangePath;
 
     if (!finalShortest && !finalLeastInterchange) {
       return NextResponse.json(

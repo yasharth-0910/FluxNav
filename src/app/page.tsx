@@ -36,7 +36,6 @@ export default function Home() {
   const [result, setResult] = useState<MultiRouteResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [explanations, setExplanations] = useState<{ [key: string]: string }>({});
   const [tips, setTips] = useState<{ [key: string]: string[] }>({});
   const [accessNotes, setAccessNotes] = useState<{ [key: string]: string }>({});
@@ -56,11 +55,9 @@ export default function Home() {
       const response = await fetch('/api/stations');
       const data = await response.json();
       setStations(data);
-      setIsInitialLoad(false);
     } catch (error) {
       console.error('Error fetching stations:', error);
       setError('Failed to load stations');
-      setIsInitialLoad(false);
     }
   };
 

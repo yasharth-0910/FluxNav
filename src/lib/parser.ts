@@ -101,7 +101,7 @@ export class MetroParser {
     }
 
     return Array.from(stationCount.entries())
-      .filter(([_, count]) => count > 1)
+      .filter(([, count]) => count > 1)
       .map(([name]) => name);
   }
 } 
