@@ -39,7 +39,25 @@ export async function GET(request: NextRequest) {
     // Find least interchange path
     const leastInterchangePath = await pathFinder.findLeastInterchangePath(fromStation, toStation);
 
-    if (!shortestPath && !leastInterchangePath) {
+    // Helper to compare two paths
+    function arePathsEqual(a, b) {
+      if (!a || !b) return false;
+      if (a.path.length !== b.path.length) return false;
+      for (let i = 0; i < a.path.length; i++) {
+        if (a.path[i].station !== b.path[i].station || a.path[i].line !== b.path[i].line) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    let finalShortest = shortestPath;
+    let finalLeastInterchange = leastInterchangePath;
+    if (arePathsEqual(shortestPath, leastInterchangePath)) {
+      finalLeastInterchange = null;
+    }
+
+    if (!finalShortest && !finalLeastInterchange) {
       return NextResponse.json(
         { error: 'No path found between stations' },
         { status: 404 }
@@ -47,16 +65,16 @@ export async function GET(request: NextRequest) {
     }
 
     // Calculate fares
-    const shortestFare = shortestPath
-      ? await fareCalculator.calculateFare(shortestPath.totalDistance, shortestPath.interchanges)
+    const shortestFare = finalShortest
+      ? await fareCalculator.calculateFare(finalShortest.totalDistance, finalShortest.interchanges)
       : null;
-    const leastInterchangeFare = leastInterchangePath
-      ? await fareCalculator.calculateFare(leastInterchangePath.totalDistance, leastInterchangePath.interchanges)
+    const leastInterchangeFare = finalLeastInterchange
+      ? await fareCalculator.calculateFare(finalLeastInterchange.totalDistance, finalLeastInterchange.interchanges)
       : null;
 
     const result = {
-      shortest: shortestPath ? { ...shortestPath, fare: shortestFare } : null,
-      leastInterchange: leastInterchangePath ? { ...leastInterchangePath, fare: leastInterchangeFare } : null,
+      shortest: finalShortest ? { ...finalShortest, fare: shortestFare } : null,
+      leastInterchange: finalLeastInterchange ? { ...finalLeastInterchange, fare: leastInterchangeFare } : null,
     };
 
     // Cache the result

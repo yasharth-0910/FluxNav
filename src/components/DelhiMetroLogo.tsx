@@ -6,7 +6,7 @@ export default function DelhiMetroLogo() {
         <div className="absolute inset-2 bg-white rounded-full" />
         <div className="absolute inset-4 bg-red-500 rounded-full" />
       </div>
-      <span className="text-xl font-bold text-white">DMRC</span>
+      <span className="text-xl font-bold text-white">FluxNav</span>
     </div>
   );
 }

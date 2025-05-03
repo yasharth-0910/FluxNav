@@ -1,0 +1,79 @@
+```mermaid
+flowchart TD
+  %% User
+  User[User's Browser]
+
+  %% Frontend
+  subgraph Frontend [Next.js Frontend]
+    UI[UI Components\n(StationSelector, RouteVisualization, Chat, etc.)]
+    State[State Management\n(useState, useEffect, etc.)]
+    Markdown[Markdown Renderer\n(react-markdown)]
+    APIClient[API Client\n(fetch, askGemini)]
+    GeminiUI[Gemini AI UI\n(Explain, Tips, Compare, FAQ)]
+  end
+
+  %% Backend
+  subgraph Backend [Next.js API Routes]
+    APIPath[/api/path\nRoute Calculation]
+    APIStations[/api/stations\nStation Data]
+    APILines[/api/lines\nLine Data]
+    APICache[In-memory Cache\n(pathCache, etc.)]
+  end
+
+  %% Business Logic
+  subgraph Logic [Business Logic]
+    PathFinder[MetroPathFinder\n(Dijkstra, BFS, Least Interchange)]
+    FareCalc[FareCalculator]
+    GeminiUtil[Gemini API Utility]
+  end
+
+  %% Database
+  subgraph DB [Database]
+    Prisma[Prisma ORM]
+    Postgres[(PostgreSQL DB)]
+  end
+
+  %% External
+  subgraph External
+    GeminiAPI[Google Gemini API]
+  end
+
+  %% User interactions
+  User -- "Select stations, search" --> UI
+  User -- "Ask AI, click explain/tips/compare" --> GeminiUI
+
+  %% Frontend flows
+  UI -- "Update state" --> State
+  UI -- "Show markdown" --> Markdown
+  GeminiUI -- "askGemini()" --> APIClient
+  APIClient -- "/api/path, /api/stations, /api/lines" --> Backend
+  APIClient -- "Gemini API" --> GeminiUtil
+
+  %% Backend flows
+  APIPath -- "Check cache" --> APICache
+  APIPath -- "findShortestPath, findLeastInterchangePath" --> PathFinder
+  APIPath -- "calculateFare" --> FareCalc
+  APIStations -- "DB query" --> Prisma
+  APILines -- "DB query" --> Prisma
+  PathFinder -- "DB query" --> Prisma
+  FareCalc -- "DB query" --> Prisma
+  Prisma -- "SQL" --> Postgres
+
+  %% AI integration
+  GeminiUtil -- "POST prompt" --> GeminiAPI
+  GeminiAPI -- "AI response" --> GeminiUtil
+  GeminiUtil -- "AI response" --> GeminiUI
+  GeminiUI -- "Render markdown" --> Markdown
+
+  %% Error handling
+  APIPath -- "Error/404" --> UI
+  APIStations -- "Error" --> UI
+  GeminiUtil -- "Error" --> GeminiUI
+
+  %% Caching
+  APICache -- "Cache hit/miss" --> APIPath
+
+  %% Visualization
+  UI -- "Show route" --> RouteVisualization
+  RouteVisualization -- "Show markdown" --> Markdown
+``` 

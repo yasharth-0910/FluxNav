@@ -11,6 +11,7 @@ interface RouteVisualizationProps {
   totalDistance: number;
   interchanges: number;
   fare: number;
+  label?: string;
 }
 
 const lineColors: { [key: string]: string } = {
@@ -38,6 +39,7 @@ export default function RouteVisualization({
   totalDistance,
   interchanges,
   fare,
+  label,
 }: RouteVisualizationProps) {
   const [visibleStations, setVisibleStations] = useState<number>(0);
 
@@ -58,8 +60,22 @@ export default function RouteVisualization({
 
   const estimatedTime = Math.ceil(totalDistance / 1000 * 2); // Assuming 2 minutes per km
 
+  const showDistanceNA = !totalDistance || totalDistance < 1000 && path.length > 2;
+  const showFareNA = fare === undefined || fare === null || isNaN(fare);
+  const showTimeNA = showDistanceNA;
+  const showInterchangeNA = (interchanges === 0 && path.length > 1);
+  const suspiciousRoute = showInterchangeNA || showDistanceNA;
+
   return (
     <div className="mt-8">
+      {label && (
+        <div className="mb-4 text-xl font-bold text-center text-white/90 tracking-wide">
+          {label}
+        </div>
+      )}
+      {suspiciousRoute && (
+        <div className="mb-4 text-center text-yellow-400 font-semibold">⚠️ Route stats may be incomplete or suspicious</div>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
         <div className="bg-white/10 backdrop-blur-sm p-4 rounded-lg transform transition-all duration-300 hover:scale-105">
           <div className="flex items-center gap-2 mb-2">
@@ -67,7 +83,7 @@ export default function RouteVisualization({
             <h3 className="text-sm text-gray-300">Total Distance</h3>
           </div>
           <p className="text-2xl font-bold text-white">
-            {(totalDistance / 1000).toFixed(1)} km
+            {showDistanceNA ? 'N/A' : `${(totalDistance / 1000).toFixed(1)} km`}
           </p>
         </div>
         <div className="bg-white/10 backdrop-blur-sm p-4 rounded-lg transform transition-all duration-300 hover:scale-105">
@@ -75,21 +91,21 @@ export default function RouteVisualization({
             <ArrowPathIcon className="w-5 h-5 text-white/60" />
             <h3 className="text-sm text-gray-300">Interchanges</h3>
           </div>
-          <p className="text-2xl font-bold text-white">{interchanges}</p>
+          <p className="text-2xl font-bold text-white">{showInterchangeNA ? '-' : interchanges}</p>
         </div>
         <div className="bg-white/10 backdrop-blur-sm p-4 rounded-lg transform transition-all duration-300 hover:scale-105">
           <div className="flex items-center gap-2 mb-2">
             <ClockIcon className="w-5 h-5 text-white/60" />
             <h3 className="text-sm text-gray-300">Estimated Time</h3>
           </div>
-          <p className="text-2xl font-bold text-white">{estimatedTime} min</p>
+          <p className="text-2xl font-bold text-white">{showTimeNA ? '-' : `${estimatedTime} min`}</p>
         </div>
         <div className="bg-white/10 backdrop-blur-sm p-4 rounded-lg transform transition-all duration-300 hover:scale-105">
           <div className="flex items-center gap-2 mb-2">
             <CurrencyRupeeIcon className="w-5 h-5 text-white/60" />
             <h3 className="text-sm text-gray-300">Fare</h3>
           </div>
-          <p className="text-2xl font-bold text-white">₹{fare.toFixed(2)}</p>
+          <p className="text-2xl font-bold text-white">{showFareNA ? 'N/A' : `₹${fare.toFixed(2)}`}</p>
         </div>
       </div>
 

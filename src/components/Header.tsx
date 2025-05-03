@@ -1,4 +1,4 @@
-import { DelhiMetroLogo } from "@/components/DelhiMetroLogo"
+import DelhiMetroLogo from "@/components/DelhiMetroLogo"
 
 export function Header() {
   return (
@@ -6,7 +6,7 @@ export function Header() {
       <div className="flex items-center gap-3">
         <DelhiMetroLogo />
         <div>
-          <div className="font-bold text-lg text-white">Delhi Metro</div>
+          <div className="font-bold text-lg text-white">AI-powered Delhi Metro</div>
           <div className="text-xs text-white/60 -mt-1">Route Navigator</div>
         </div>
       </div>

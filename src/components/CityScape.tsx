@@ -1,7 +1,18 @@
 "use client"
-import { useEffect, useRef } from "react"
+import { useEffect, useState } from "react"
 
 export default function CityScape() {
+  const [rects, setRects] = useState<{ x: number; y: number }[]>([]);
+
+  useEffect(() => {
+    // Only run on client
+    const newRects = Array.from({ length: 20 }).map((_, i) => ({
+      x: i * 50 + 10,
+      y: Math.random() * 100 + 50,
+    }));
+    setRects(newRects);
+  }, []);
+
   return (
     <div className="absolute bottom-0 left-0 right-0 h-32">
       <svg
@@ -15,11 +26,11 @@ export default function CityScape() {
           className="fill-gray-800"
         />
         {/* Windows */}
-        {Array.from({ length: 20 }).map((_, i) => (
+        {rects.map((rect, i) => (
           <rect
             key={i}
-            x={i * 50 + 10}
-            y={Math.random() * 100 + 50}
+            x={rect.x}
+            y={rect.y}
             width="10"
             height="10"
             className="fill-yellow-500/20"
