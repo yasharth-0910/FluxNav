@@ -7,8 +7,8 @@ const pathFinder = new MetroPathFinder();
 const fareCalculator = new FareCalculator();
 
 // Simple in-memory cache
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const pathCache = new Map<string, unknown>();
+type PathCacheValue = { data: any; timestamp: number };
+const pathCache = new Map<string, PathCacheValue>();
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 function getCacheKey(from: string, to: string) {
@@ -30,8 +30,7 @@ export async function GET(request: NextRequest) {
 
     // Check cache
     const cacheKey = getCacheKey(fromStation, toStation);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const cachedResult = pathCache.get(cacheKey) as unknown;
+    const cachedResult = pathCache.get(cacheKey);
     if (cachedResult && Date.now() - cachedResult.timestamp < CACHE_TTL) {
       return NextResponse.json(cachedResult.data);
     }
